@@ -1,0 +1,90 @@
+version: '3'
+services:
+  postgredb:
+    image: postgres
+    container_name: pgdb
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: ${KONG_PG_DATABASE:-postgres}
+      POSTGRES_PASSWORD: ${KONG_PG_PASSWORD:-satya}
+      POSTGRES_USER: ${KONG_PG_USER:-satya}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${KONG_PG_USER:-satya}"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    restart: on-failure
+    stdin_open: true
+    tty: true
+    volumes:
+      - my-data:/var/lib/postgresql/data/ 
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    volumes:
+      - my-data:/data/db
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017/konga --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 27017:27017
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+      - 61613:61613
+    volumes:
+      - ./.docker/rabbitmq/etc/:/etc/rabbitmq/
+      - ./.docker/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./.docker/rabbitmq/logs/:/var/log/rabbitmq/
+  elastic-node-01:
+    image: elasticsearch:7.10.1
+    container_name: elastic-node-01
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=elastic-node-02
+      - cluster.initial_master_nodes=elastic-node-01,elastic-node-02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./.docker/elastic/node-01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+  elastic-node-02:
+    image: elasticsearch:7.10.1
+    container_name: elastic-node-02
+    environment:
+      - node.name=elastic-node-02
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=elastic-node-01
+      - cluster.initial_master_nodes=elastic-node-01,elastic-node-02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./.docker/elastic/node-02:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+
+volumes:
+
+networks:
+  elastic:
+    driver: bridge
+volumes:
+  my-data: 

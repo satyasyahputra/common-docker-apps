@@ -1,0 +1,5 @@
+.docker/elastic/node-01/nodes/
+.docker/elastic/node-02/nodes/
+.docker/rabbitmq/data/mnesia/
+.docker/rabbitmq/data/.erlang.cookie
+.docker/rabbitmq/logs/log/
