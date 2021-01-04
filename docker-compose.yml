@@ -46,7 +46,7 @@ services:
     image: elasticsearch:7.10.1
     container_name: elastic-node-01
     environment:
-      - node.name=es01
+      - node.name=elastic-node-01
       - cluster.name=es-docker-cluster
       - discovery.seed_hosts=elastic-node-02
       - cluster.initial_master_nodes=elastic-node-01,elastic-node-02
@@ -80,9 +80,37 @@ services:
       - ./.docker/elastic/node-02:/usr/share/elasticsearch/data
     networks:
       - elastic
-
-volumes:
-
+  zookeeper:
+    image: zookeeper:3.4.9
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+      - 2181:2181
+    environment:
+        ZOO_MY_ID: 1
+        ZOO_PORT: 2181
+        ZOO_SERVERS: server.1=zookeeper:2888:3888
+    volumes:
+      - ./.docker/zookeeper/data:/data
+      - ./.docker/zookeeper/datalog:/datalog
+  kafka:
+    image: confluentinc/cp-kafka:5.5.1
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka:19092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - ./.docker/kafka/data:/var/lib/kafka/data
+    depends_on:
+      - zookeeper
 networks:
   elastic:
     driver: bridge
