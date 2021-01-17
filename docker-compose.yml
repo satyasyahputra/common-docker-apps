@@ -46,10 +46,11 @@ services:
     image: elasticsearch:7.10.1
     container_name: elastic-node-01
     environment:
-      - node.name=elastic-node-01
-      - cluster.name=es-docker-cluster
-      - discovery.seed_hosts=elastic-node-02
-      - cluster.initial_master_nodes=elastic-node-01,elastic-node-02
+      - node.name=es01
+      - discovery.type=single-node
+      # - cluster.name=es-docker-cluster
+      # - discovery.seed_hosts=es02
+      # - cluster.initial_master_nodes=es01,es02
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
@@ -60,26 +61,7 @@ services:
       - ./.docker/elastic/node-01:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-    networks:
-      - elastic
-  elastic-node-02:
-    image: elasticsearch:7.10.1
-    container_name: elastic-node-02
-    environment:
-      - node.name=elastic-node-02
-      - cluster.name=es-docker-cluster
-      - discovery.seed_hosts=elastic-node-01
-      - cluster.initial_master_nodes=elastic-node-01,elastic-node-02
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - ./.docker/elastic/node-02:/usr/share/elasticsearch/data
-    networks:
-      - elastic
+      - 9300:9300
   zookeeper:
     image: zookeeper:3.4.9
     container_name: zookeeper
@@ -111,8 +93,5 @@ services:
       - ./.docker/kafka/data:/var/lib/kafka/data
     depends_on:
       - zookeeper
-networks:
-  elastic:
-    driver: bridge
 volumes:
   my-data: 
