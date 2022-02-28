@@ -90,8 +90,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
   # springboot-apps:
-  #   image: xipinq/springboot-apps:0.1
-  #   container_name: springboot-apps
+  #   image: synctek/account:0.1
+  #   container_name: account
   #   ports: 
   #     - 8801:8801
   #   depends_on: 
