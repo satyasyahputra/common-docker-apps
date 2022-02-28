@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${KONG_PG_PASSWORD:-satya}
       POSTGRES_USER: ${KONG_PG_USER:-satya}
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${KONG_PG_USER:-satya}"]
+      test: [ "CMD", "pg_isready", "-U", "${KONG_PG_USER:-satya}" ]
       interval: 30s
       timeout: 30s
       retries: 3
@@ -18,7 +18,7 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - my-data:/var/lib/postgresql/data/ 
+      - my-data:/var/lib/postgresql/data/
   mongodb:
     image: mongo
     container_name: mongodb
@@ -89,12 +89,5 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  # springboot-apps:
-  #   image: synctek/account:0.1
-  #   container_name: account
-  #   ports: 
-  #     - 8801:8801
-  #   depends_on: 
-  #     - postgredb
 volumes:
-  my-data: 
+  my-data:
