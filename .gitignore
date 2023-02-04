@@ -3,3 +3,5 @@
 .docker/rabbitmq/logs/
 .docker/kafka/
 .docker/zookeeper
+
+.vscode
