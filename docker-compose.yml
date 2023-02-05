@@ -43,10 +43,11 @@ services:
       - ./.docker/rabbitmq/data/:/var/lib/rabbitmq/
       - ./.docker/rabbitmq/logs/:/var/log/rabbitmq/
   es01:
-    image: elasticsearch:7.10.1
+    image: elasticsearch:8.6.1
     container_name: es01
     environment:
       - node.name=es01
+      - xpack.security.enabled=false
       # - discovery.type=single-node
       - cluster.name=es-docker-cluster
       - discovery.seed_hosts=es02
@@ -63,12 +64,13 @@ services:
       - 9200:9200
       - 9300:9300
   es02:
-    image: elasticsearch:7.10.1
+    image: elasticsearch:8.6.1
     depends_on:
       - es01
     container_name: es02
     environment:
       - node.name=es02
+      - xpack.security.enabled=false
       # - discovery.type=single-node
       - cluster.name=es-docker-cluster
       - discovery.seed_hosts=es01
@@ -95,13 +97,19 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: [ "CMD", "sh", "-c", "nc -nz 127.0.0.1 2181" ]
+      interval: 5s
+      timeout: 60s
+      retries: 120
     ports:
       - 22181:2181
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     ports:
       - 29092:29092
     environment:
