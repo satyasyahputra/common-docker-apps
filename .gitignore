@@ -1,7 +1,13 @@
-.docker/elastic/
-.docker/rabbitmq/data/
-.docker/rabbitmq/logs/
-.docker/kafka/
-.docker/zookeeper
+# Elasticsearch
+elasticsearch/.docker
 
+# RabbitMQ
+rabbitmq/.docker/rabbitmq/data/
+rabbitmq/.docker/rabbitmq/logs/
+rabbitmq/.docker/kafka/
+
+# Kafka
+kafka/.docker/zookeeper
+
+#VSCode
 .vscode

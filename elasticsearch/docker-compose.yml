@@ -1,0 +1,97 @@
+version: '3'
+services:
+  es01:
+    image: elasticsearch:8.6.1
+    container_name: es01
+    environment:
+      - node.name=es01
+      - xpack.security.enabled=false
+      # - discovery.type=single-node
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./.docker/elastic/node-01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s https://localhost:9200",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+  es02:
+    image: elasticsearch:8.6.1
+    depends_on:
+      - es01
+    container_name: es02
+    environment:
+      - node.name=es02
+      - xpack.security.enabled=false
+      # - discovery.type=single-node
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./.docker/elastic/node-02:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200
+      - 9301:9300
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s https://localhost:9200",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  es03:
+    image: elasticsearch:8.6.1
+    depends_on:
+      - es02
+    container_name: es03
+    environment:
+      - node.name=es03
+      - xpack.security.enabled=false
+      # - discovery.type=single-node
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./.docker/elastic/node-03:/usr/share/elasticsearch/data
+    ports:
+      - 9202:9200
+      - 9302:9300
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s https://localhost:9200",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120

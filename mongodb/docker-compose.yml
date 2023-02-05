@@ -1,0 +1,17 @@
+version: '3'
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    volumes:
+      - my-data:/data/db
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017/konga --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 27017:27017
+volumes:
+  my-data:
+    driver: local
